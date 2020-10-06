@@ -1,9 +1,7 @@
 ### Fork Change
 让服务端的router 和 forward_proxy 共存 
 
-增加了 router 下 direct 的选项 
-
-表示不走forward_proxy 直接请求
+bypass 表示不走forward_proxy 直接请求
 
 举个栗子：
 ```
@@ -16,14 +14,13 @@
     },
     "router": {
       "enabled": true,
-      "direct": [],
       "bypass": [],
       "proxy": [
                     "domain:xxx.com",
                     "domain:xxx1.com",
       ],
       "block": [],
-      "default_policy": "direct",
+      "default_policy": "bypass",
       "domain_strategy": "as_is",
       "geoip": "$PROGRAM_DIR$/geoip.dat",
       "geosite": "$PROGRAM_DIR$/geosite.dat"

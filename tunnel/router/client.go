@@ -22,7 +22,6 @@ const (
 	Proxy  = 0
 	Bypass = 1
 	Block  = 2
-	Direct = 3
 )
 
 const (
@@ -120,8 +119,8 @@ func newIPAddress(address *tunnel.Address) (*tunnel.Address, error) {
 }
 
 type Client struct {
-	domains        [4][]*v2router.Domain
-	cidrs          [4][]*v2router.CIDR
+	domains        [3][]*v2router.Domain
+	cidrs          [3][]*v2router.CIDR
 	defaultPolicy  int
 	domainStrategy int
 	underlay       tunnel.Client
@@ -140,14 +139,14 @@ func (c *Client) Route(address *tunnel.Address) int {
 		}
 	}
 	if address.AddressType == tunnel.DomainName {
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			if matchDomain(c.domains[i], address.DomainName) {
 				policy = i
 				break
 			}
 		}
 	} else {
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			if matchIP(c.cidrs[i], address.IP) {
 				policy = i
 				break
@@ -159,7 +158,7 @@ func (c *Client) Route(address *tunnel.Address) int {
 		if err != nil {
 			return c.defaultPolicy
 		}
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			if matchIP(c.cidrs[i], address.IP) {
 				policy = i
 				break
@@ -177,18 +176,10 @@ func (c *Client) DialConn(address *tunnel.Address, overlay tunnel.Tunnel) (tunne
 	switch policy {
 	case Proxy:
 		return c.underlay.DialConn(address, overlay)
-	case Direct:
-		conn, err := c.direct.DialConnDirect(address, &Tunnel{})
-		if err != nil {
-			return nil, common.NewError("router dial error").Base(err)
-		}
-		return &transport.Conn{
-			Conn: conn,
-		}, nil
 	case Block:
 		return nil, common.NewError("router blocked address: " + address.String())
 	case Bypass:
-		conn, err := c.direct.DialConn(address, &Tunnel{})
+		conn, err := c.direct.DialConnDirect(address, &Tunnel{})
 		if err != nil {
 			return nil, common.NewError("router dial error").Base(err)
 		}
@@ -249,14 +240,6 @@ func loadCode(cfg *Config, prefix string) []codeInfo {
 			})
 		}
 	}
-	for _, s := range cfg.Router.Direct {
-		if strings.HasPrefix(s, prefix) {
-			codes = append(codes, codeInfo{
-				code:     s[len(prefix):],
-				strategy: Direct,
-			})
-		}
-	}
 	for _, s := range cfg.Router.Block {
 		if strings.HasPrefix(s, prefix) {
 			codes = append(codes, codeInfo{
@@ -278,8 +261,8 @@ func NewClient(ctx context.Context, underlay tunnel.Client) (*Client, error) {
 		return nil, common.NewError("router failed to initialize raw client").Base(err)
 	}
 	client := &Client{
-		domains:  [4][]*v2router.Domain{},
-		cidrs:    [4][]*v2router.CIDR{},
+		domains:  [3][]*v2router.Domain{},
+		cidrs:    [3][]*v2router.CIDR{},
 		underlay: underlay,
 		direct:   direct,
 		ctx:      ctx,
@@ -301,8 +284,6 @@ func NewClient(ctx context.Context, underlay tunnel.Client) (*Client, error) {
 		client.defaultPolicy = Proxy
 	case "bypass":
 		client.defaultPolicy = Bypass
-	case "direct":
-		client.defaultPolicy = Direct
 	case "block":
 		client.defaultPolicy = Block
 		return nil, common.NewError("unknown strategy: " + cfg.Router.DomainStrategy)

@@ -16,7 +16,6 @@ type Config struct {
 type RouterConfig struct {
 	Enabled         bool     `json:"enabled" yaml:"enabled"`
 	Bypass          []string `json:"bypass" yaml:"bypass"`
-	Direct          []string `json:"direct" yaml:"direct"`
 	Proxy           []string `json:"proxy" yaml:"proxy"`
 	Block           []string `json:"block" yaml:"block"`
 	DomainStrategy  string   `json:"domain_strategy" yaml:"domain-strategy"`
