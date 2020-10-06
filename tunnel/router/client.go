@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	Direct = -1
 	Proxy  = 0
 	Bypass = 1
 	Block  = 2
@@ -176,6 +177,8 @@ func (c *Client) DialConn(address *tunnel.Address, overlay tunnel.Tunnel) (tunne
 	switch policy {
 	case Proxy:
 		return c.underlay.DialConn(address, overlay)
+	case Direct:
+		return c.underlay.DialConn(address, &Tunnel{})
 	case Block:
 		return nil, common.NewError("router blocked address: " + address.String())
 	case Bypass:
@@ -233,6 +236,14 @@ func loadCode(cfg *Config, prefix string) []codeInfo {
 		}
 	}
 	for _, s := range cfg.Router.Bypass {
+		if strings.HasPrefix(s, prefix) {
+			codes = append(codes, codeInfo{
+				code:     s[len(prefix):],
+				strategy: Bypass,
+			})
+		}
+	}
+	for _, s := range cfg.Router.Direct {
 		if strings.HasPrefix(s, prefix) {
 			codes = append(codes, codeInfo{
 				code:     s[len(prefix):],
