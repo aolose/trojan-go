@@ -1,3 +1,37 @@
+### Fork Change
+让服务端的router 和 共存 
+
+增加了 router 下 direct 的选项 
+
+表示不走forward_proxy 直接请求
+
+举个栗子：
+```
+    "forward_proxy": {
+        "enabled": true,
+        "proxy_addr": "127.0.0.1",
+        "proxy_port": 1083,
+        "username": "",
+        "password": ""
+    },
+    "router": {
+      "enabled": true,
+      "direct": [],
+      "bypass": [],
+      "proxy": [
+                    "domain:xxx.com",
+                    "domain:xxx1.com",
+      ],
+      "block": [],
+      "default_policy": "direct",
+      "domain_strategy": "as_is",
+      "geoip": "$PROGRAM_DIR$/geoip.dat",
+      "geosite": "$PROGRAM_DIR$/geosite.dat"
+   }
+
+```
+
+
 # Trojan-Go
 
 [![License](https://img.shields.io/github/license/p4gefau1t/trojan-go)](https://img.shields.io/github/license/p4gefau1t/trojan-go)
