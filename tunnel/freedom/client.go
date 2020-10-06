@@ -23,7 +23,24 @@ type Client struct {
 	password     string
 }
 
-func (c *Client) DialConn(addr *tunnel.Address, _ tunnel.Tunnel) (tunnel.Conn, error) {
+func (c *Client) DialConnDirect(addr *tunnel.Address, _ tunnel.Tunnel) (tunnel.Conn, error) {
+	network := "tcp"
+	if c.preferIPv4 {
+		network = "tcp4"
+	}
+	dialer := new(net.Dialer)
+	tcpConn, err := dialer.DialContext(c.ctx, network, addr.String())
+	if err != nil {
+		return nil, common.NewError("freedom failed to dial " + addr.String()).Base(err)
+	}
+	tcpConn.(*net.TCPConn).SetKeepAlive(c.keepAlive)
+	tcpConn.(*net.TCPConn).SetNoDelay(c.noDelay)
+	return &Conn{
+		Conn: tcpConn,
+	}, nil
+}
+
+func (c *Client) DialConn(addr *tunnel.Address, t tunnel.Tunnel) (tunnel.Conn, error) {
 	// forward proxy
 	if c.forwardProxy {
 		var auth *proxy.Auth
@@ -45,21 +62,7 @@ func (c *Client) DialConn(addr *tunnel.Address, _ tunnel.Tunnel) (tunnel.Conn, e
 			Conn: conn,
 		}, nil
 	}
-	network := "tcp"
-	if c.preferIPv4 {
-		network = "tcp4"
-	}
-	dialer := new(net.Dialer)
-	tcpConn, err := dialer.DialContext(c.ctx, network, addr.String())
-	if err != nil {
-		return nil, common.NewError("freedom failed to dial " + addr.String()).Base(err)
-	}
-
-	tcpConn.(*net.TCPConn).SetKeepAlive(c.keepAlive)
-	tcpConn.(*net.TCPConn).SetNoDelay(c.noDelay)
-	return &Conn{
-		Conn: tcpConn,
-	}, nil
+	return c.DialConnDirect(addr, t)
 }
 
 func (c *Client) DialPacket(tunnel.Tunnel) (tunnel.PacketConn, error) {

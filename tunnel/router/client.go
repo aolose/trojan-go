@@ -178,7 +178,7 @@ func (c *Client) DialConn(address *tunnel.Address, overlay tunnel.Tunnel) (tunne
 	case Proxy:
 		return c.underlay.DialConn(address, overlay)
 	case Direct:
-		return c.underlay.DialConn(address, &Tunnel{})
+		return c.direct.DialConnDirect(address, &Tunnel{})
 	case Block:
 		return nil, common.NewError("router blocked address: " + address.String())
 	case Bypass:
