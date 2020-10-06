@@ -96,6 +96,15 @@ func (c *PacketConn) WriteWithMetadata(p []byte, m *tunnel.Metadata) (int, error
 			IP:   ip,
 			Port: m.Address.Port,
 		})
+	case Direct:
+		ip, err := m.Address.ResolveIP()
+		if err != nil {
+			return 0, common.NewError("router failed to resolve udp address").Base(err)
+		}
+		return c.PacketConn.WriteTo(p, &net.UDPAddr{
+			IP:   ip,
+			Port: m.Address.Port,
+		})
 	default:
 		panic("unknown policy")
 	}

@@ -303,6 +303,8 @@ func NewClient(ctx context.Context, underlay tunnel.Client) (*Client, error) {
 		client.defaultPolicy = Proxy
 	case "bypass":
 		client.defaultPolicy = Bypass
+	case "direct":
+		client.defaultPolicy = Direct
 	case "block":
 		client.defaultPolicy = Block
 		return nil, common.NewError("unknown strategy: " + cfg.Router.DomainStrategy)
