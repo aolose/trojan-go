@@ -1,5 +1,5 @@
 ### Fork Change
-让服务端的router 和 共存 
+让服务端的router 和 forward_proxy 共存 
 
 增加了 router 下 direct 的选项 
 
