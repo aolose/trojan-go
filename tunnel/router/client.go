@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	Direct = -1
 	Proxy  = 0
 	Bypass = 1
 	Block  = 2
+	Direct = 3
 )
 
 const (
@@ -120,8 +120,8 @@ func newIPAddress(address *tunnel.Address) (*tunnel.Address, error) {
 }
 
 type Client struct {
-	domains        [3][]*v2router.Domain
-	cidrs          [3][]*v2router.CIDR
+	domains        [4][]*v2router.Domain
+	cidrs          [4][]*v2router.CIDR
 	defaultPolicy  int
 	domainStrategy int
 	underlay       tunnel.Client
@@ -140,14 +140,14 @@ func (c *Client) Route(address *tunnel.Address) int {
 		}
 	}
 	if address.AddressType == tunnel.DomainName {
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 4; i++ {
 			if matchDomain(c.domains[i], address.DomainName) {
 				policy = i
 				break
 			}
 		}
 	} else {
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 4; i++ {
 			if matchIP(c.cidrs[i], address.IP) {
 				policy = i
 				break
@@ -159,7 +159,7 @@ func (c *Client) Route(address *tunnel.Address) int {
 		if err != nil {
 			return c.defaultPolicy
 		}
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 4; i++ {
 			if matchIP(c.cidrs[i], address.IP) {
 				policy = i
 				break
@@ -274,8 +274,8 @@ func NewClient(ctx context.Context, underlay tunnel.Client) (*Client, error) {
 	}
 
 	client := &Client{
-		domains:  [3][]*v2router.Domain{},
-		cidrs:    [3][]*v2router.CIDR{},
+		domains:  [4][]*v2router.Domain{},
+		cidrs:    [4][]*v2router.CIDR{},
 		underlay: underlay,
 		direct:   direct,
 		ctx:      ctx,
