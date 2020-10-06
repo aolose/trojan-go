@@ -2,13 +2,12 @@ package freedom
 
 import (
 	"context"
-	"net"
-
 	"github.com/p4gefau1t/trojan-go/common"
 	"github.com/p4gefau1t/trojan-go/config"
 	"github.com/p4gefau1t/trojan-go/tunnel"
 	"github.com/txthinking/socks5"
 	"golang.org/x/net/proxy"
+	"net"
 )
 
 type Client struct {

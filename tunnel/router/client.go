@@ -253,7 +253,7 @@ func loadCode(cfg *Config, prefix string) []codeInfo {
 		if strings.HasPrefix(s, prefix) {
 			codes = append(codes, codeInfo{
 				code:     s[len(prefix):],
-				strategy: Bypass,
+				strategy: Direct,
 			})
 		}
 	}
@@ -272,13 +272,11 @@ func NewClient(ctx context.Context, underlay tunnel.Client) (*Client, error) {
 	cfg := config.FromContext(ctx, Name).(*Config)
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(ctx)
-
 	direct, err := freedom.NewClient(ctx, nil)
 	if err != nil {
 		cancel()
 		return nil, common.NewError("router failed to initialize raw client").Base(err)
 	}
-
 	client := &Client{
 		domains:  [4][]*v2router.Domain{},
 		cidrs:    [4][]*v2router.CIDR{},
